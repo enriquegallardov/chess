@@ -62,6 +62,55 @@ class Board:
         pygame.draw.rect(shape_surface, color, shape_surface.get_rect())
         surface.blit(shape_surface, rect)
 
+    def get_possible_moves(self, piece):
+        """Return possible moves for piece"""
+
+        # Implement possible moves for each piece
+        # Movements are not all correct in distance, but they have the correct direction
+        # Pawns have special moves like en passant, two-square move, etc.
+        # Moves like castling
+
+        moves = []
+        position = util.get_position_from_coordinates(piece.rect.center)
+        if piece.name == "p":
+            moves.append((position[0] - 1, position[1]) if piece.color ==
+                         "w" else (position[0] + 1, position[1]))
+        if piece.name == "k":
+            moves.append((position[0] - 1, position[1] - 1))
+            moves.append((position[0] - 1, position[1] + 1))
+            moves.append((position[0] + 1, position[1] - 1))
+            moves.append((position[0] + 1, position[1] + 1))
+        if piece.name == "n":
+            moves.append((position[0] - 2, position[1] - 1))
+            moves.append((position[0] - 2, position[1] + 1))
+            moves.append((position[0] + 2, position[1] - 1))
+            moves.append((position[0] + 2, position[1] + 1))
+            moves.append((position[0] - 1, position[1] - 2))
+            moves.append((position[0] - 1, position[1] + 2))
+            moves.append((position[0] + 1, position[1] - 2))
+            moves.append((position[0] + 1, position[1] + 2))
+        if piece.name == "b":
+            moves.append((position[0] - 1, position[1] - 1))
+            moves.append((position[0] - 1, position[1] + 1))
+            moves.append((position[0] + 1, position[1] - 1))
+            moves.append((position[0] + 1, position[1] + 1))
+        if piece.name == "r":
+            moves.append((position[0] - 1, position[1]))
+            moves.append((position[0] + 1, position[1]))
+            moves.append((position[0], position[1] - 1))
+            moves.append((position[0], position[1] + 1))
+        if piece.name == "q":
+            moves.append((position[0] - 1, position[1] - 1))
+            moves.append((position[0] - 1, position[1] + 1))
+            moves.append((position[0] + 1, position[1] - 1))
+            moves.append((position[0] + 1, position[1] + 1))
+            moves.append((position[0] - 1, position[1]))
+            moves.append((position[0] + 1, position[1]))
+            moves.append((position[0], position[1] - 1))
+            moves.append((position[0], position[1] + 1))
+
+        return moves
+
 
 class Piece(pygame.sprite.Sprite):
     """Piece representation"""
@@ -86,10 +135,6 @@ class Piece(pygame.sprite.Sprite):
         """Set the x and y coordinates based on the grid position"""
         self.rect.x, self.rect.y = (
             position[1] * TILESIZE + TILESIZE // 8, position[0] * TILESIZE + TILESIZE // 8)
-
-    def get_possible_moves(self):
-        if self.name == "p":
-            position = 1
 
 
 def main():
@@ -124,6 +169,7 @@ def main():
                         offset_x = selected_piece.rect.x - event.pos[0]
                         offset_y = selected_piece.rect.y - event.pos[1]
                         original_position = hovering_position
+
             elif event.type == MOUSEBUTTONUP:
                 if event.button == 1 and selected_piece:
                     captured_piece = board.board[hovering_position[0]

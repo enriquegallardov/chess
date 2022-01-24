@@ -1,4 +1,5 @@
 # TODO:
+
 - Correct the piece movement
 - Have different hover and selected colors for the black and white pieces
 - Add rules such as castling, en passant, pawn promotion, etc.
