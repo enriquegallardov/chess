@@ -7,5 +7,5 @@
 - Add a clock
 - Identify all chess terms (Wikipedia) (?/?)
 - Identify all chess openings, as per ECO (Wikipedia) (?/?)
-- Identify all chess engames (Wikipedia) (?/?)
+- Identify all chess endgames (Wikipedia) (?/?)
 - Add a chess engine

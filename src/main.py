@@ -65,10 +65,7 @@ class Board:
     def get_possible_moves(self, piece):
         """Return possible moves for piece"""
 
-        # Implement possible moves for each piece
-        # Movements are not all correct in distance, but they have the correct direction
-        # Pawns have special moves like en passant, two-square move, etc.
-        # Moves like castling
+        # Special moves like en passant, castling, pawn promotion, etc.
 
         moves = []
         position = util.get_position_from_coordinates(piece.rect.center)
@@ -80,6 +77,10 @@ class Board:
             moves.append((position[0] - 1, position[1] + 1))
             moves.append((position[0] + 1, position[1] - 1))
             moves.append((position[0] + 1, position[1] + 1))
+            moves.append((position[0] - 1, position[1]))
+            moves.append((position[0] + 1, position[1]))
+            moves.append((position[0], position[1] - 1))
+            moves.append((position[0], position[1] + 1))
         if piece.name == "n":
             moves.append((position[0] - 2, position[1] - 1))
             moves.append((position[0] - 2, position[1] + 1))
@@ -89,25 +90,72 @@ class Board:
             moves.append((position[0] - 1, position[1] + 2))
             moves.append((position[0] + 1, position[1] - 2))
             moves.append((position[0] + 1, position[1] + 2))
-        if piece.name == "b":
-            moves.append((position[0] - 1, position[1] - 1))
-            moves.append((position[0] - 1, position[1] + 1))
-            moves.append((position[0] + 1, position[1] - 1))
-            moves.append((position[0] + 1, position[1] + 1))
-        if piece.name == "r":
-            moves.append((position[0] - 1, position[1]))
-            moves.append((position[0] + 1, position[1]))
-            moves.append((position[0], position[1] - 1))
-            moves.append((position[0], position[1] + 1))
-        if piece.name == "q":
-            moves.append((position[0] - 1, position[1] - 1))
-            moves.append((position[0] - 1, position[1] + 1))
-            moves.append((position[0] + 1, position[1] - 1))
-            moves.append((position[0] + 1, position[1] + 1))
-            moves.append((position[0] - 1, position[1]))
-            moves.append((position[0] + 1, position[1]))
-            moves.append((position[0], position[1] - 1))
-            moves.append((position[0], position[1] + 1))
+        if piece.name == "b" or piece.name == "q":
+            for i in range(1, 8):
+                if position[0] - i >= 0 and position[1] - i >= 0:
+                    if self.board[position[0] - i][position[1] - i] is None:
+                        moves.append((position[0] - i, position[1] - i))
+                    else:
+                        if self.board[position[0] - i][position[1] - i].color != piece.color:
+                            moves.append((position[0] - i, position[1] - i))
+                        break
+            for i in range(1, 8):
+                if position[0] - i >= 0 and position[1] + i < 8:
+                    if self.board[position[0] - i][position[1] + i] is None:
+                        moves.append((position[0] - i, position[1] + i))
+                    else:
+                        if self.board[position[0] - i][position[1] + i].color != piece.color:
+                            moves.append((position[0] - i, position[1] + i))
+                        break
+            for i in range(1, 8):
+                if position[0] + i < 8 and position[1] - i >= 0:
+                    if self.board[position[0] + i][position[1] - i] is None:
+                        moves.append((position[0] + i, position[1] - i))
+                    else:
+                        if self.board[position[0] + i][position[1] - i].color != piece.color:
+                            moves.append((position[0] + i, position[1] - i))
+                        break
+            for i in range(1, 8):
+                if position[0] + i < 8 and position[1] + i < 8:
+                    if self.board[position[0] + i][position[1] + i] is None:
+                        moves.append((position[0] + i, position[1] + i))
+                    else:
+                        if self.board[position[0] + i][position[1] + i].color != piece.color:
+                            moves.append((position[0] + i, position[1] + i))
+                        break
+        if piece.name == "r" or piece.name == "q":
+            for i in range(1, 8):
+                if position[0] - i >= 0:
+                    if self.board[position[0] - i][position[1]] is None:
+                        moves.append((position[0] - i, position[1]))
+                    else:
+                        if self.board[position[0] - i][position[1]].color != piece.color:
+                            moves.append((position[0] - i, position[1]))
+                        break
+            for i in range(1, 8):
+                if position[0] + i < 8:
+                    if self.board[position[0] + i][position[1]] is None:
+                        moves.append((position[0] + i, position[1]))
+                    else:
+                        if self.board[position[0] + i][position[1]].color != piece.color:
+                            moves.append((position[0] + i, position[1]))
+                        break
+            for i in range(1, 8):
+                if position[1] - i >= 0:
+                    if self.board[position[0]][position[1] - i] is None:
+                        moves.append((position[0], position[1] - i))
+                    else:
+                        if self.board[position[0]][position[1] - i].color != piece.color:
+                            moves.append((position[0], position[1] - i))
+                        break
+            for i in range(1, 8):
+                if position[1] + i < 7:
+                    if self.board[position[0]][position[1] + i] is None:
+                        moves.append((position[0], position[1] + i))
+                    else:
+                        if self.board[position[0]][position[1] + i].color != piece.color:
+                            moves.append((position[0], position[1] + i))
+                        break
 
         return moves
 
@@ -169,13 +217,15 @@ def main():
                         offset_x = selected_piece.rect.x - event.pos[0]
                         offset_y = selected_piece.rect.y - event.pos[1]
                         original_position = hovering_position
+                        possible_moves = board.get_possible_moves(
+                            selected_piece)
 
             elif event.type == MOUSEBUTTONUP:
                 if event.button == 1 and selected_piece:
                     captured_piece = board.board[hovering_position[0]
                                                  ][hovering_position[1]]
 
-                    if (captured_piece and (captured_piece.color == selected_piece.color)) or (board.turn != selected_piece.color):
+                    if (captured_piece and (captured_piece.color == selected_piece.color)) or (board.turn != selected_piece.color) or (hovering_position not in possible_moves):
                         selected_piece.set_coordinates_from_position(
                             original_position)
                         selected_piece = None
@@ -202,7 +252,7 @@ def main():
 
         screen.blit(board.background, (0, 0))
 
-        board.draw_rect_alpha(screen, HOVER if not selected_piece else SELECTED,
+        board.draw_rect_alpha(screen, HOVER if (not selected_piece or selected_piece.color != board.turn or hovering_position not in [*possible_moves, original_position]) else SELECTED,
                               (hovering_position[1] * TILESIZE, hovering_position[0] * TILESIZE, TILESIZE, TILESIZE))
 
         board.pieces.update()
