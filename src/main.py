@@ -84,7 +84,6 @@ class Board:
                         self.board[position[0] - 1][position[1] + 1].color != piece.color:
                     moves.append((position[0] - 1, position[1] + 1))
             else:
-                print(position)
                 if position[0] == 1 and self.board[position[0] + 2][position[1]] is None:
                     moves.append((position[0] + 2, position[1]))
                 if self.board[position[0] + 1][position[1]] is None:
@@ -257,8 +256,8 @@ def main():
                         if captured_piece and (captured_piece.color != selected_piece.color):
                             board.pieces.remove(captured_piece)
                             if captured_piece.name == "k":
-                                print(
-                                    f"Checkmate! {selected_piece.color} wins!")
+                                # TODO: Game over and restart
+                                pass
                         board.board[original_position[0]
                                     ][original_position[1]] = None
                         board.board[hovering_position[0]
