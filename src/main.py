@@ -1,3 +1,4 @@
+from ast import Pass
 import configparser
 
 import pygame
@@ -12,7 +13,8 @@ config.read("config/config.ini")
 TILESIZE = int(config["TILESIZE"]["TILESIZE"])
 WHITE = pygame.Color(config["COLORS"]["WHITE"])
 BLACK = pygame.Color(config["COLORS"]["BLACK"])
-HOVER = pygame.Color(config["COLORS"]["HOVER"])
+WHITE_HOVER = pygame.Color(config["COLORS"]["BLACK"] + "7a")
+BLACK_HOVER = pygame.Color(config["COLORS"]["WHITE"] + "7a")
 SELECTED = pygame.Color(config["COLORS"]["SELECTED"])
 
 
@@ -59,7 +61,8 @@ class Board:
     def draw_rect_alpha(self, surface, color, rect):
         """Draw rectangle with alpha"""
         shape_surface = pygame.Surface(pygame.Rect(rect).size, pygame.SRCALPHA)
-        pygame.draw.rect(shape_surface, color, shape_surface.get_rect())
+        pygame.draw.rect(shape_surface, color,
+                         shape_surface.get_rect(), TILESIZE // 25)
         surface.blit(shape_surface, rect)
 
     def get_possible_moves(self, piece):
@@ -70,8 +73,30 @@ class Board:
         moves = []
         position = util.get_position_from_coordinates(piece.rect.center)
         if piece.name == "p":
-            moves.append((position[0] - 1, position[1]) if piece.color ==
-                         "w" else (position[0] + 1, position[1]))
+            if piece.color == "w":
+                if position[0] == 6 and self.board[position[0] - 2][position[1]] is None:
+                    moves.append((position[0] - 2, position[1]))
+                if self.board[position[0] - 1][position[1]] is None:
+                    moves.append((position[0] - 1, position[1]))
+                if position[1] > 0 and self.board[position[0] - 1][position[1] - 1] is not None and \
+                        self.board[position[0] - 1][position[1] - 1].color != piece.color:
+                    moves.append((position[0] - 1, position[1] - 1))
+                if position[1] < 6 and self.board[position[0] - 1][position[1] + 1] is not None and \
+                        self.board[position[0] - 1][position[1] + 1].color != piece.color:
+                    moves.append((position[0] - 1, position[1] + 1))
+            else:
+                print(position)
+                if position[0] == 1 and self.board[position[0] + 2][position[1]] is None:
+                    moves.append((position[0] + 2, position[1]))
+                if self.board[position[0] + 1][position[1]] is None:
+                    moves.append((position[0] + 1, position[1]))
+                if position[1] < 6 and self.board[position[0] + 1][position[1] - 1] is not None and \
+                        self.board[position[0] + 1][position[1] - 1].color != piece.color:
+                    moves.append((position[0] + 1, position[1] - 1))
+                if position[1] < 0 and self.board[position[0] + 1][position[1] + 1] is not None and \
+                        self.board[position[0] + 1][position[1] + 1].color != piece.color:
+                    moves.append((position[0] + 1, position[1] + 1))
+
         if piece.name == "k":
             moves.append((position[0] - 1, position[1] - 1))
             moves.append((position[0] - 1, position[1] + 1))
@@ -232,6 +257,9 @@ def main():
                     else:
                         if captured_piece and (captured_piece.color != selected_piece.color):
                             board.pieces.remove(captured_piece)
+                            if captured_piece.name == "k":
+                                print(
+                                    f"Checkmate! {selected_piece.color} wins!")
                         board.board[original_position[0]
                                     ][original_position[1]] = None
                         board.board[hovering_position[0]
@@ -243,7 +271,7 @@ def main():
                         selected_piece = None
 
                         board.turn = "w" if board.turn == "b" else "b"
-                        board.half_move += 2
+                        board.half_move += 1
 
             elif event.type == MOUSEMOTION:
                 if selected_piece:
@@ -252,7 +280,15 @@ def main():
 
         screen.blit(board.background, (0, 0))
 
-        board.draw_rect_alpha(screen, HOVER if (not selected_piece or selected_piece.color != board.turn or hovering_position not in [*possible_moves, original_position]) else SELECTED,
+        if (not selected_piece or selected_piece.color != board.turn or hovering_position not in [*possible_moves, original_position]):
+            if ((hovering_position[0] + hovering_position[1]) % 2 == 0):
+                color = WHITE_HOVER
+            else:
+                color = BLACK_HOVER
+        else:
+            color = SELECTED
+
+        board.draw_rect_alpha(screen, color,
                               (hovering_position[1] * TILESIZE, hovering_position[0] * TILESIZE, TILESIZE, TILESIZE))
 
         board.pieces.update()

@@ -1,6 +1,5 @@
 # TODO:
 
-- Have different hover and selected colors for the black and white pieces
 - Add rules such as castling, en passant, pawn promotion, etc.
 - Add algebraic notation commentary
 - Add a clock
